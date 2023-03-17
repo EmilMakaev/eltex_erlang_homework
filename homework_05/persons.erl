@@ -39,11 +39,8 @@ updateAgeForAllWomen() ->
     ],
 
     Fun = fun
-        (#person{gender = Gender, age = Age} = Person) ->
-            case Gender =:= ?FEMALE of
-                true -> Person#person{age = Age - 1};
-                false -> Person
-            end;
+        (#person{gender = ?FEMALE, age = Age} = Person) ->
+            Person#person{age = Age - 1};
         (Person) ->
             Person
     end,
