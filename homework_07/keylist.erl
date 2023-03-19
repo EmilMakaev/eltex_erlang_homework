@@ -48,8 +48,8 @@ loop(#state{list = List, counter = Counter} = State) ->
 
 start(Name) ->
     Pid = spawn(keylist, loop, [#state{}]),
-    monitor(process, Pid),
-    MonitorRef = register(Name, Pid),
+    MonitorRef = monitor(process, Pid),
+    register(Name, Pid),
     {ok, Pid, MonitorRef}.
 
 start_link(Name) ->
