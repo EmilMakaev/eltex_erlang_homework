@@ -6,15 +6,18 @@
 
 start() ->
     {Pid, MonitorRef} = spawn_monitor(?MODULE, loop, [#state{}]),
+    % process_flag(Pid, save_calls, 10000),
     register(?MODULE, Pid),
     {ok, Pid, MonitorRef}.
 
 loop(#state{children = Children} = State) ->
+    process_flag(trap_exit, true),
+
     receive
         {From, start_child, Name} ->
             case lists:keymember(Name, 1, Children) of
                 false ->
-                    {ok, Pid} = keylist:start(Name),
+                    {ok, Pid} = keylist:start_link(Name),
                     NewState = State#state{children = [{Name, Pid} | Children]},
                     From ! {ok, Pid},
                     loop(NewState);
@@ -32,13 +35,13 @@ loop(#state{children = Children} = State) ->
                     loop(State)
             end;
         stop ->
-            exit(whereis(?MODULE), killed);
+            ok;
         {From, get_names} ->
             From ! {ok, lists:map(fun({Name, _Pid}) -> Name end, Children)},
             loop(State);
-        {'Exit', Name, Reason} ->
-            exit(whereis(Name), Reason),
-            NewState = State#state{children = proplists:delete(whereis(Name), Children)},
+        {'Exit', Pid, Reason} ->
+            io:format("Pid ~p ended due to ~p~n", [Pid, Reason]),
+            NewState = State#state{children = lists:keydelete(Pid, 2, Children)},
             loop(NewState)
     end.
 
