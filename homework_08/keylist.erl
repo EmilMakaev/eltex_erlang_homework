@@ -54,5 +54,6 @@ start(Name) ->
 
 start_link(Name) ->
     Pid = spawn_link(keylist, loop, [#state{}]),
+    monitor(process, Pid),
     register(Name, Pid),
     {ok, Pid}.
