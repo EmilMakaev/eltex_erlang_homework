@@ -21,9 +21,9 @@
 -type restart() :: permanent | temporary.
 -type child() :: #{name => atom(), restart => restart()}.
 
-% @doc start fun - starts a process with a monitor manager that is waiting for
-% a message to control the state of inherited processes.
-%
+%%% @doc start fun - starts a process with a monitor manager that is waiting for
+%%% a message to control the state of inherited processes.
+%%%
 -spec start() -> {atom(), pid(), reference()}.
 start() ->
     {Pid, Monitor_ref} = spawn_monitor(?MODULE, init, []),
@@ -37,26 +37,26 @@ init() ->
 terminate(_State) ->
     ok.
 
-% @doc start_child fun - creates a child and associates it with the manager
-%
+%%% @doc start_child fun - creates a child and associates it with the manager
+%%%
 -spec start_child(Params :: child()) -> {pid(), atom(), child()}.
 start_child(Params) ->
     ?MODULE ! {self(), start_child, Params}.
 
-% @doc stop_child fun - stops the child and removes it from the manager's store
-%
+%%% @doc stop_child fun - stops the child and removes it from the manager's store
+%%%
 -spec stop_child(Name :: atom()) -> {pid(), atom(), atom()}.
 stop_child(Name) ->
     ?MODULE ! {self(), stop_child, Name}.
 
-% @doc stop fun - stops the manager and all his children
-%
+%%% @doc stop fun - stops the manager and all his children
+%%%
 -spec stop() -> atom().
 stop() ->
     ?MODULE ! stop.
 
-% @doc get_names fun - returns a list of names that the manager currently has
-%
+%%% @doc get_names fun - returns a list of names that the manager currently has
+%%%
 -spec get_names() -> list(atom()).
 get_names() ->
     ?MODULE ! {self(), get_names}.
@@ -106,15 +106,17 @@ loop(#state{children = Children, permanent = Permanent} = State) ->
                     },
                     loop(NewState);
                 true ->
-                    {value, {Old_name, Old_pid}, UpdatedChildrenList} = lists:keytake(
+                    {value, {OldName, OldPid}, UpdatedChildrenList} = lists:keytake(
                         Pid, 2, Children
                     ),
-                    {ok, New_pid} = keylist:start_link(Old_name),
+                    {ok, NewPid} = keylist:start_link(OldName),
 
                     NewState = State#state{
-                        children = [{Old_name, New_pid} | UpdatedChildrenList],
+                        children = [{OldName, NewPid} | UpdatedChildrenList],
                         permanent = [
-                            New_pid | lists:filter(fun(El) -> El =/= Old_pid end, Permanent)
+                            % New_pid | lists:filter(fun(El) -> El =/= Old_pid end, Permanent)
+                            NewPid
+                            | lists:delete(OldPid, Permanent)
                         ]
                     },
                     loop(NewState)

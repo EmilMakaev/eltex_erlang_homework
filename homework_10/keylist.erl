@@ -18,9 +18,9 @@
 
 -type key() :: {string(), string(), string()}.
 
-% @doc start fun - starts a process with a monitor manager that is waiting for
-% a message to control the state.
-%
+%%% @doc start fun - starts a process with a monitor manager that is waiting for
+%%% a message to control the state.
+%%%
 -spec start(Name :: atom()) -> {ok, pid()}.
 start(Name) ->
     Pid = spawn(keylist, init, []),
@@ -28,9 +28,9 @@ start(Name) ->
     register(Name, Pid),
     {ok, Pid}.
 
-% @doc start_link fun - starts a process with a link manager that is waiting for
-% a message to control the state.
-%
+%%% @doc start_link fun - starts a process with a link manager that is waiting for
+%%% a message to control the state.
+%%%
 -spec start_link(Name :: atom()) -> {ok, pid()}.
 start_link(Name) ->
     Pid = spawn_link(keylist, init, []),
@@ -43,39 +43,39 @@ init() ->
 terminate(_State) ->
     ok.
 
-% @doc stop fun - stops the process
-%
+%%% @doc stop fun - stops the process
+%%%
 -spec stop(Name :: atom()) -> atom().
 stop(Name) ->
     Name ! stop.
 
-% @doc add fun - stops the manager and all his children, plus increases the counter
-%
+%%% @doc add fun - stops the manager and all his children, plus increases the counter
+%%%
 -spec add(Name :: atom(), Key :: string(), Value :: string(), Comment :: string()) ->
     {ok, number()}.
 add(Name, Key, Value, Comment) ->
     Name ! {self(), add, Key, Value, Comment}.
 
-% @doc is_member fun - checks if the specified Key is in the list, plus increases the counter
-%
+%%% @doc is_member fun - checks if the specified Key is in the list, plus increases the counter
+%%%
 -spec is_member(Name :: atom(), Key :: string()) -> {ok, number(), atom()}.
 is_member(Name, Key) ->
     Name ! {self(), is_member, Key}.
 
-% @doc take fun - removes and returns Tuple if the specified Key exists otherwise returns false, plus increases the counter
-%
+%%% @doc take fun - removes and returns Tuple if the specified Key exists otherwise returns false, plus increases the counter
+%%%
 -spec take(Name :: atom(), Key :: string()) -> {ok, number(), false | key()}.
 take(Name, Key) ->
     Name ! {self(), take, Key}.
 
-% @doc find fun - returns Tuple if the specified Key exists otherwise returns false, plus increases the counter
-%
+%%% @doc find fun - returns Tuple if the specified Key exists otherwise returns false, plus increases the counter
+%%%
 -spec find(Name :: atom(), Key :: string()) -> {ok, number(), false | key()}.
 find(Name, Key) ->
     Name ! {self(), find, Key}.
 
-% @doc delete fun - removes specified Key, plus increases the counter
-%
+%%% @doc delete fun - removes specified Key, plus increases the counter
+%%%
 -spec delete(Name :: atom(), Key :: string()) -> {ok, number()}.
 delete(Name, Key) ->
     Name ! {self(), delete, Key}.
