@@ -6,6 +6,8 @@
 %%%-----------------------------------------------------------------------------
 -module(keylist).
 
+-behaviour(gen_server).
+
 -record(state, {
     list = [],
     counter = 0
@@ -63,21 +65,12 @@ find(Name, Key) ->
 delete(Name, Key) ->
     gen_server:call(Name, {delete, Key}).
 
-% Name - это имя процесса keylist
-% Pattern - паттерн матчинга для функции ets:match/2.
-% {'$1', 2, '$2'}
 -spec match(Name :: atom(), Pattern :: ets:match_pattern()) -> {ok, list()}.
 match(Name, Pattern) -> gen_server:call(Name, {match, Pattern}).
 
-% Name - это имя процесса keylist
-% Pattern - паттерн матчинга для функции ets:match_object/2.
 -spec match_object(Name :: atom(), Pattern :: ets:match_pattern()) -> {ok, list()}.
 match_object(Name, Pattern) -> gen_server:call(Name, {match_object, Pattern}).
 
-% Name - это имя процесса keylist
-% Filter - это функция для которой вы в keylist вызовите ets:fun2ms/1. Правила написания
-% функции мы разбирали на лекции и также можно посмотреть в документации
-% https://www.erlang.org/doc/man/ets.html#fun2ms-1
 -spec select(Name :: atom(), Filter :: fun()) -> {ok, list()}.
 select(Name, Filter) -> gen_server:call(Name, {select, Filter}).
 
@@ -117,6 +110,10 @@ handle_call({match_object, Pattern}, _From, State) ->
 handle_call({select, Filter}, _From, State) ->
     SelectMsFun = ets:fun2ms(Filter),
     {reply, {ok, lists:append(ets:select(?KEY_LIST_ETS, SelectMsFun))}, State}.
+
+handle_cast(Msg, State) ->
+    io:format("Received unexpected cast msg ~p ~n", [Msg]),
+    {noreply, State}.
 
 % Info
 handle_info({added_new_child, _Pid, _Name} = Msg, State) ->
